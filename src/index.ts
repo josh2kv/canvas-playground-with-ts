@@ -1,4 +1,4 @@
-import { Calculator } from './calculator';
 import './index.css';
 
-const cal = new Calculator();
+import { BasicClock } from './BasicClock';
+const app = new BasicClock();
