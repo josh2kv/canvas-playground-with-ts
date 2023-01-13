@@ -16,8 +16,9 @@ export class BasicClock {
     this.canvas.height = 300;
     this.context = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     this.FONT_HEIGHT = 15;
-    this.MARGIN = 35;
-    this.HAND_TRUNCATION = this.canvas.width / 25;
+    // canvas와 circle 사이 gap
+    this.MARGIN = 40;
+    this.HAND_TRUNCATION = this.canvas.width / 30;
     this.HOUR_HAND_TRUNCATION = this.canvas.width / 10;
     this.NUMERAL_SPACING = 20;
     this.RADIUS = this.canvas.width / 2 - this.MARGIN;
@@ -60,8 +61,13 @@ export class BasicClock {
 
     numerals.forEach(numeral => {
       const strNumeral = numeral.toString();
+      // arc의 시작점은 3시위치
       angle = (Math.PI / 6) * (numeral - 3);
+      // 각 숫자의 글자너비를 측정함
       numeralWidth = this.context.measureText(strNumeral).width;
+      // this.HAND_RADIUS = this.RADIUS(150 - 40) + this.NUMERAL_SPACING(20);
+      // x = 0부터 중점.x의 거리 + 중점.x부터 글자left.x의 거리 - 글자left부터 글자 중점x의 거리
+      // 중점.x부터 글자left.x의 거리(밑변)  = 중점부터 글자까지 직선거리(빗변) * cos(빗변과 밑변사이 각도)
       this.context.fillText(
         strNumeral,
         this.canvas.width / 2 +
