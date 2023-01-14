@@ -1,3 +1,7 @@
+/**
+ * Core HTML5 Canvas
+ * Example 1.4 A basic clock
+ */
 export class BasicClock {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;

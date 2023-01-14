@@ -1,4 +1,4 @@
 import './index.css';
+import { SpriteSheetInspector } from './SpriteSheetInspector';
 
-import { BasicClock } from './BasicClock';
-const app = new BasicClock();
+const app = new SpriteSheetInspector();
