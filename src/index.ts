@@ -1,4 +1,5 @@
 import './index.css';
 
-import { BasicClock } from './BasicClock';
-const app = new BasicClock();
+import { RotatingShape } from './RotatingShape';
+const app = new RotatingShape();
+app.init();
