@@ -12,6 +12,8 @@ export class RotatingShape {
   timerID: number | null = null;
   radianTheta: number = 0;
   mouse: IMouse;
+  startAngle: number | null = null;
+  endAngle: number | null = null;
 
   constructor() {
     this.canvas = new Canvas('canvas', { width: 600, height: 600 });
@@ -83,15 +85,20 @@ export class RotatingShape {
       dy
     );
 
-    this.radianTheta = Math.atan2(dy, dx);
+    if (this.startAngle === null) {
+      this.startAngle = Math.atan2(dy, dx);
+    }
+
+    this.endAngle = Math.atan2(dy, dx);
+    const deltaAngle = this.endAngle - this.startAngle;
     // if (this.radianTheta < 0) {
     //   this.radianTheta = this.radianTheta + Math.PI * 2;
     // }
-    console.log('degree: ', radianToRoundedDegree(this.radianTheta));
+    console.log('degree: ', radianToRoundedDegree(deltaAngle));
     // console.log('🚀 > this.ctx.getTransform()', this.ctx.getTransform());
 
     // this.rotateShape();
-    this.rotateAbout();
+    this.rotateAbout(deltaAngle);
     console.log('🚀 > this.shape.center', this.shape.center);
 
     // position(
@@ -134,11 +141,11 @@ export class RotatingShape {
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
-  rotateAbout(): void {
+  rotateAbout(deltaAngle: number): void {
     const pivotX = this.pivotPoint.center.x;
     const pivotY = this.pivotPoint.center.y;
-    const cosineTheta = Math.cos(this.radianTheta);
-    const sinTheta = Math.sin(this.radianTheta);
+    const cosineTheta = Math.cos(-deltaAngle);
+    const sinTheta = Math.sin(-deltaAngle);
     this.ctx.transform(
       cosineTheta,
       -sinTheta,
