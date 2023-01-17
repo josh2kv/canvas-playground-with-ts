@@ -1,8 +1,8 @@
-import { Coordinates, Mouse } from './types';
+import { ICoordinates, IMouse } from './types';
 import { Rectangular } from './Square';
 import { Circle } from './Circle';
 import { Canvas } from './Canvas';
-import { radianToDegree, degreeToRadian } from '../utils';
+import { radianToRoundedDegree, degreeToRadian } from '../utils';
 
 export class RotatingShape {
   canvas: Canvas;
@@ -11,14 +11,14 @@ export class RotatingShape {
   shape: Rectangular;
   timerID: number | null = null;
   radianTheta: number = 0;
-  mouse: Mouse;
+  mouse: IMouse;
 
   constructor() {
     this.canvas = new Canvas('canvas', { width: 600, height: 600 });
     this.ctx = this.canvas.ctx;
     this.pivotPoint = new Circle({ x: 300, y: 300 }, 5, this.ctx);
     this.shape = new Rectangular({ x: 300, y: 200 }, 100, 50, this.ctx);
-    this.mouse = { x: 0, y: 0, button: false, boundBox: null };
+    this.mouse = { x: 0, y: 0, isDragging: false, boundBox: null };
   }
 
   init(): void {
@@ -33,22 +33,22 @@ export class RotatingShape {
   }
 
   setMouse(e: MouseEvent) {
-    this.mouse.boundBox = this.canvas.canvas.getBoundingClientRect() as DOMRect;
+    const boundBox = this.canvas.canvas.getBoundingClientRect() as DOMRect;
     // this.mouse.x = e.pageX - this.mouse.boundBox.left - window.scrollY;
     // this.mouse.y = e.pageY - this.mouse.boundBox.top - window.scrollX;
-    this.mouse.x = e.clientX - this.mouse.boundBox.left;
-    this.mouse.y = e.clientY - this.mouse.boundBox.top;
-    this.mouse.button =
+    this.mouse.x = e.clientX - boundBox.left;
+    this.mouse.y = e.clientY - boundBox.top;
+    this.mouse.isDragging =
       e.type === 'mousedown'
         ? true
         : e.type === 'mouseup'
         ? false
-        : this.mouse.button;
+        : this.mouse.isDragging;
     if (e.type === 'mousemove') this.update();
   }
 
   update(): void {
-    if (!this.mouse.button) return;
+    if (!this.mouse.isDragging) return;
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.globalAlpha = 1;
     this.ctx.clearRect(
@@ -87,8 +87,12 @@ export class RotatingShape {
     // if (this.radianTheta < 0) {
     //   this.radianTheta = this.radianTheta + Math.PI * 2;
     // }
-    console.log('degree: ', Math.floor(radianToDegree(this.radianTheta)));
-    this.rotateShape();
+    console.log('degree: ', radianToRoundedDegree(this.radianTheta));
+    // console.log('🚀 > this.ctx.getTransform()', this.ctx.getTransform());
+
+    // this.rotateShape();
+    this.rotateAbout();
+    console.log('🚀 > this.shape.center', this.shape.center);
 
     // position(
     //   this.ctx,
@@ -123,24 +127,32 @@ export class RotatingShape {
       this.pivotPoint.center.y
     );
     this.ctx.rotate(this.radianTheta);
-    // const x = this.pivotPoint.center.x;
-    // const y = this.pivotPoint.center.y;
-    // const ct = Math.cos(this.radianTheta);
-    // const st = Math.sin(this.radianTheta);
-    // this.ctx.transform(
-    //   ct,
-    //   -st,
-    //   st,
-    //   ct,
-    //   -x * ct - y * st + x,
-    //   x * st - y * ct + y
-    // );
-    // this.shape.center = { x: this.mouse.x, y: this.mouse.y };\
 
     // pivot point에서 0도로 하고 싶은 직선의 점 중에 하나를 shape의 중점으로 해야함
-    this.shape.center = { x: 100, y: 0 };
+    this.shape.center = { x: 300, y: 200 };
     this.shape.draw();
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  rotateAbout(): void {
+    const pivotX = this.pivotPoint.center.x;
+    const pivotY = this.pivotPoint.center.y;
+    const cosineTheta = Math.cos(this.radianTheta);
+    const sinTheta = Math.sin(this.radianTheta);
+    this.ctx.transform(
+      cosineTheta,
+      -sinTheta,
+      sinTheta,
+      cosineTheta,
+      -pivotX * cosineTheta - pivotY * sinTheta + pivotX,
+      pivotX * sinTheta - pivotY * cosineTheta + pivotY
+    );
+    this.shape.center = { x: 300, y: 200 };
+    this.shape.draw();
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    console.log('🚀 > this.ctx.getTransform()', this.ctx.getTransform());
+
+    // this.shape.center = { x: this.mouse.x, y: this.mouse.y };
   }
 
   startAnimation(): void {

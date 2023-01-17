@@ -1,7 +1,7 @@
-export const radianToDegree = (radian: number):number => {
-  return radian / Math.PI * 180
-}
+export const radianToRoundedDegree = (radian: number): number => {
+  return Math.round((radian / Math.PI) * 180);
+};
 
 export const degreeToRadian = (degree: number): number => {
-    return degree / 180 * Math.PI
-}
+  return (degree / 180) * Math.PI;
+};

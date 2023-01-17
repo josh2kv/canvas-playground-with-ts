@@ -1,16 +1,18 @@
-export interface Coordinates {
+export interface ICoordinates {
   x: number;
   y: number;
 }
 
-export interface CanvasOptions {
+export interface ICanvasOptions {
   width: number;
   height: number;
 }
 
-export interface Mouse {
+export interface IMouse {
   x: number;
   y: number;
-  button: boolean;
+  isDragging: boolean;
   boundBox: DOMRect | null;
 }
+
+export type TransformMatrix = [number, number, number, number, number, number];

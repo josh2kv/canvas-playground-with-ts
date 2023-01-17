@@ -1,4 +1,4 @@
-import { Coordinates } from './types';
+import { ICoordinates } from './types';
 
 export class Circle {
   #ctx;
@@ -9,7 +9,7 @@ export class Circle {
   // #strokeColor;
 
   constructor(
-    point: Coordinates,
+    point: ICoordinates,
     radius: number,
     ctx: CanvasRenderingContext2D
   ) {

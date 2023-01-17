@@ -1,15 +1,15 @@
-import { Coordinates } from "./types";
+import { ICoordinates } from './types';
 
 export class Rectangular {
   #ctx: CanvasRenderingContext2D;
   width: number;
   height: number;
-  #fillColor = "rgba(0, 0, 111, .3)";
+  #fillColor = 'rgba(0, 0, 111, .3)';
 
-  _center: Coordinates;
+  _center: ICoordinates;
 
   constructor(
-    point: Coordinates,
+    point: ICoordinates,
     width: number,
     height: number,
     ctx: CanvasRenderingContext2D
@@ -31,10 +31,10 @@ export class Rectangular {
     this.#ctx.closePath();
     this.#ctx.fillStyle = this.#fillColor;
     this.#ctx.fill();
-    this.indicateTop();
+    this.drawTopDot();
   }
 
-  indicateTop() {
+  drawTopDot() {
     this.#ctx.beginPath();
     this.#ctx.arc(
       this.center.x,
@@ -43,15 +43,15 @@ export class Rectangular {
       0,
       Math.PI * 2
     );
-    this.#ctx.fillStyle = "orange";
+    this.#ctx.fillStyle = 'orange';
     this.#ctx.fill();
   }
 
-  get center(): Coordinates {
+  get center(): ICoordinates {
     return this._center;
   }
 
-  set center(point: Coordinates) {
+  set center(point: ICoordinates) {
     this._center = point;
   }
 }
