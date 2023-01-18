@@ -11,13 +11,14 @@ declare module 'fabric' {
       pivotPoint?: fabric.Point;
       normalized?: number | null;
       inversionAngle?: number | null;
+      sPoint?: fabric.Point;
     }
     interface ExtendedTransform extends fabric.Transform {
       target: ExtendedObject;
     }
 
     interface ExtendedIEvent extends IEvent {
-      target?: ExtendedObject | undefined;
+      target?: ExtendedObject;
     }
   }
 }
@@ -96,6 +97,21 @@ console.log('🚀 > mTotal', mTotal);
 canvas.on('object:moving', handleObjectMove);
 canvas.on('object:modified', handleObjectModified);
 
+poly.on('mousedown', (e: fabric.ExtendedIEvent) => {
+  if (e.target && e.absolutePointer) {
+    e.target.sPoint = new fabric.Point(
+      e.absolutePointer.x,
+      e.absolutePointer.y
+    );
+  }
+});
+
+poly.on('mouseup', (e: fabric.ExtendedIEvent) => {
+  if (e.target && e.absolutePointer) {
+    e.target.sPoint = new fabric.Point(0, 0);
+  }
+});
+
 function handleObjectModified(e: fabric.ExtendedIEvent) {
   if (e.target?.inversionAngle) {
     e.target.inversionAngle = undefined;
@@ -134,7 +150,71 @@ function handleObjectMove(e: fabric.IEvent<MouseEvent>) {
   const vpt = canvas.viewportTransform as transformMatrix;
   //const {x,y}=fabric.util.transformPoint(e.pointer,vpt)
   const { x, y } = e.pointer as fabric.Point;
-  rotationWithSnapping(e.e, e.transform as fabric.ExtendedTransform, x, y);
+  // rotationWithSnapping(e.e, e.transform as fabric.ExtendedTransform, x, y);
+  rotateObjectWithSnapping(e.e, e.transform as fabric.ExtendedTransform, x, y);
+}
+
+function rotateObjectWithSnapping(eventData: any, t: any, x: any, y: any) {
+  const { target, ex, ey, theta, originX, originY } = t;
+
+  console.log('🚀 > ex, ey', ex, ey);
+  if (!target.pivotPoint) {
+    target.pivotPoint = target.getCenterPoint();
+    return;
+  }
+
+  if (!target.centerPoint) {
+    target.centerPoint = target.getCenterPoint();
+    return;
+  }
+  const pivotPoint = target.pivotPoint;
+
+  // if (fabric.util.isLocked(target, "lockRotation")) {
+  //     return false;
+  // }
+
+  const lastAngle = Math.atan2(ey - pivotPoint.y, ex - pivotPoint.x),
+    curAngle = Math.atan2(y - pivotPoint.y, x - pivotPoint.x);
+  let angle = fabric.util.radiansToDegrees(curAngle - lastAngle + theta);
+
+  if (target.snapAngle && target.snapAngle > 0) {
+    const snapAngle = target.snapAngle,
+      snapThreshold = target.snapThreshold || snapAngle,
+      rightAngleLocked = Math.ceil(angle / snapAngle) * snapAngle,
+      leftAngleLocked = Math.floor(angle / snapAngle) * snapAngle;
+
+    if (Math.abs(angle - leftAngleLocked) < snapThreshold) {
+      angle = leftAngleLocked;
+    } else if (Math.abs(angle - rightAngleLocked) < snapThreshold) {
+      angle = rightAngleLocked;
+    }
+  }
+
+  // normalize angle to positive value
+  if (angle < 0) {
+    angle = 360 + angle;
+  }
+  angle %= 360;
+  console.log('🚀 > %c angle', 'color: red', angle);
+  console.log(
+    '🚀 > %c theta',
+    'color: blue',
+    Math.round(fabric.util.radiansToDegrees(theta))
+  );
+
+  const hasRotated = target.angle !== angle;
+  // TODO: why aren't we using set?
+  target.angle = angle;
+
+  const afterPoint = fabric.util.rotatePoint(
+    target.centerPoint,
+    pivotPoint,
+    fabric.util.degreesToRadians(angle)
+  );
+
+  target.setPositionByOrigin(afterPoint, 'center', 'center');
+
+  return hasRotated;
 }
 
 function rotationWithSnapping(
@@ -143,7 +223,6 @@ function rotationWithSnapping(
   x: number,
   y: number
 ) {
-  console.log('🚀 > t', t);
   console.log('시작--------------------------------');
   const target = t.target;
   const vpt = target.canvas?.viewportTransform as transformMatrix;
